@@ -58,10 +58,6 @@ void MainWindow::on_pushButtonBrowse_clicked()
 
     // Populate model
     model->setStringList(*childDirectories);
-
-    // Add to backupDir list
-    QDir *newDir = new QDir(*newBackupDir);
-    backupDir->append(*newDir);
 }
 
 void MainWindow::on_pushButtonBackup_clicked()

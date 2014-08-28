@@ -29,8 +29,6 @@ private slots:
 private:
     void setMasterLayout(const QString &dir);
 
-    QDir *parentDir;
-    QList<QDir> *backupDir;
     QStringListModel *model;
     Ui::MainWindow *ui;
     QString *masterDirectory;
