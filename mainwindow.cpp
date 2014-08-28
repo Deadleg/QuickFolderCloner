@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add to list
     ui->listBackup->setModel(model);
+
+    // Initialise backupdir
+    backupDir = new QList<QDir>();
 }
 
 MainWindow::~MainWindow()
@@ -29,6 +32,8 @@ void MainWindow::on_actionNew_Project_triggered()
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "C://", QFileDialog::ShowDirsOnly);
     masterDirectory = &dir;
     qDebug() << "Master: " << *masterDirectory;
+
+    parentDir = new QDir(*masterDirectory);
 
     setMasterLayout(*masterDirectory);
 }
@@ -54,6 +59,13 @@ void MainWindow::on_pushButtonBrowse_clicked()
     // Populate model
     model->setStringList(*childDirectories);
 
-    // Add to list
-    //ui->listBackup->setModel(model);
+    // Add to backupDir list
+    QDir *newDir = new QDir(*newBackupDir);
+    backupDir->append(*newDir);
+s
+}
+
+void MainWindow::on_pushButtonBackup_clicked()
+{
+
 }

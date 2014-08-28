@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStringListModel>
+#include <QDir>
 
 namespace Ui {
 class MainWindow;
@@ -23,9 +24,13 @@ private slots:
 
     void on_pushButtonBrowse_clicked();
 
+    void on_pushButtonBackup_clicked();
+
 private:
     void setMasterLayout(const QString &dir);
 
+    QDir *parentDir;
+    QList<QDir> *backupDir;
     QStringListModel *model;
     Ui::MainWindow *ui;
     QString *masterDirectory;
