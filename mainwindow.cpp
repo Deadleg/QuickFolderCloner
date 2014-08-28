@@ -69,28 +69,41 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
 
     QFileInfo srcFileInfo(srcFilePath);
 
-    qDebug() << srcFileInfo.isDir();
-    if (srcFileInfo.isDir()) {
+    qDebug() << "src:" << srcFilePath;
+    qDebug() << "tgt:" << tgtFilePath;
 
+    if (srcFileInfo.isDir()) {
+        qDebug() << "is dir:" << srcFileInfo.isDir();
         QDir targetDir(tgtFilePath);
         targetDir.cdUp();
-        qDebug() << !targetDir.mkdir(QFileInfo(tgtFilePath).fileName());
-        //if (!targetDir.mkdir(QFileInfo(tgtFilePath).fileName()))
-        //    return false;
+        //qDebug() << !targetDir.mkdir(QFileInfo(tgtFilePath).fileName());
+        if (srcFilePath != masterDirectory && !targetDir.mkdir(QFileInfo(tgtFilePath).fileName()))
+            return false;
         QDir sourceDir(srcFilePath);
         QStringList fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
         foreach (const QString &fileName, fileNames) {
+            qDebug() << "Name:" << fileName;
+        }
+
+        foreach (const QString &fileName, fileNames) {
+            qDebug() << fileName;
             QString newSrcFilePath
                     = srcFilePath + QLatin1Char('/') + fileName;
             QString newTgtFilePath
                     = tgtFilePath + QLatin1Char('/') + fileName;
-            qDebug() << !copyRecursively(newSrcFilePath, newTgtFilePath);
+            //qDebug() << "recur" << !copyRecursively(newSrcFilePath, newTgtFilePath);
             if (!copyRecursively(newSrcFilePath, newTgtFilePath))
                 return false;
         }
     } else {
-        if (!QFile::copy(srcFilePath, tgtFilePath))
-            return false;
+        QFile *file = new QFile(tgtFilePath);
+        if (!file->exists() || file->remove()) {
+            qDebug() << srcFilePath << "clean!";
+            if (!QFile::copy(srcFilePath, tgtFilePath)) {
+                qDebug() << srcFilePath << "not clean!";
+                return false;
+            }
+        }
     }
     return true;
 }
