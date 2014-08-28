@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QStringListModel>
-#include <QDir>
 
 namespace Ui {
 class MainWindow;
@@ -27,11 +26,12 @@ private slots:
     void on_pushButtonBackup_clicked();
 
 private:
+    bool copyRecursively(QString &srcFileDirectory, QString &child);
     void setMasterLayout(const QString &dir);
 
     QStringListModel *model;
     Ui::MainWindow *ui;
-    QString *masterDirectory;
+    QString masterDirectory;
     QString *newBackupDir;
     QStringList *childDirectories;
 };
