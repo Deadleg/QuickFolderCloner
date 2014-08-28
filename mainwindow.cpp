@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add to list
     ui->listBackup->setModel(model);
+
+    enableWidgets(false);
 }
 
 MainWindow::~MainWindow()
@@ -30,12 +32,23 @@ void MainWindow::on_actionNew_Project_triggered()
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "F:/google drive/code", QFileDialog::ShowDirsOnly);
     masterDirectory = dir;
 
+    enableWidgets(true);
+
     setMasterLayout(masterDirectory);
 }
 
 void MainWindow::setMasterLayout(const QString &dir)
 {
     ui->labelMasterDir->setText(dir);
+}
+
+void MainWindow::enableWidgets(bool enable)
+{
+    ui->listFiles->setEnabled(enable);
+    ui->listBackup->setEnabled(enable);
+    ui->pushButtonBackup->setEnabled(enable);
+    ui->pushButtonBrowse->setEnabled(enable);
+    ui->textEditBackupDir->setEnabled(enable);
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -81,9 +94,6 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
             return false;
         QDir sourceDir(srcFilePath);
         QStringList fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
-        foreach (const QString &fileName, fileNames) {
-            qDebug() << "Name:" << fileName;
-        }
 
         foreach (const QString &fileName, fileNames) {
             qDebug() << fileName;
