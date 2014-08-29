@@ -29,6 +29,7 @@ private:
     bool copyRecursively(QString &srcFileDirectory, QString &child);
     void setMasterLayout(const QString &dir);
     void enableWidgets(bool enable);
+    void resetList();
 
     QStringListModel *model;
     Ui::MainWindow *ui;

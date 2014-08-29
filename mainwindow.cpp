@@ -33,8 +33,17 @@ void MainWindow::on_actionNew_Project_triggered()
     masterDirectory = dir;
 
     enableWidgets(true);
+    resetList();
 
     setMasterLayout(masterDirectory);
+}
+
+void MainWindow::resetList()
+{
+    childDirectories = new QStringList();
+
+    // Populate model
+    model->setStringList(*childDirectories);
 }
 
 void MainWindow::setMasterLayout(const QString &dir)
@@ -61,11 +70,18 @@ void MainWindow::on_pushButtonBrowse_clicked()
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "F:/google drive/code", QFileDialog::ShowDirsOnly);
     newBackupDir = &dir;
 
-    // Add to list
-    childDirectories->append(*newBackupDir);
+    // Check if the new dir is not already added, is not empty, and is not the same as the master directory.
+    if (newBackupDir != masterDirectory && *newBackupDir != "" && !childDirectories->contains(*newBackupDir)) {
+        // Add to list
+        childDirectories->append(*newBackupDir);
 
-    // Populate model
-    model->setStringList(*childDirectories);
+        // Populate model
+        model->setStringList(*childDirectories);
+    } else {
+        // TODO create dialog to print the error.
+    }
+
+
 }
 
 void MainWindow::on_pushButtonBackup_clicked()
@@ -82,33 +98,40 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
 
     QFileInfo srcFileInfo(srcFilePath);
 
+    // Print file paths
     qDebug() << "src:" << srcFilePath;
     qDebug() << "tgt:" << tgtFilePath;
 
-    if (srcFileInfo.isDir()) {
+    if (srcFileInfo.isDir()) { // Is a directory
         qDebug() << "is dir:" << srcFileInfo.isDir();
         QDir targetDir(tgtFilePath);
         targetDir.cdUp();
-        //qDebug() << !targetDir.mkdir(QFileInfo(tgtFilePath).fileName());
+
+        // Creater new folder
         if (srcFilePath != masterDirectory && !targetDir.mkdir(QFileInfo(tgtFilePath).fileName()))
             return false;
+
+        // Get list of files from the source folder
         QDir sourceDir(srcFilePath);
         QStringList fileNames = sourceDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
 
+        // Call copyRecursively for each file
         foreach (const QString &fileName, fileNames) {
             qDebug() << fileName;
             QString newSrcFilePath
                     = srcFilePath + QLatin1Char('/') + fileName;
             QString newTgtFilePath
                     = tgtFilePath + QLatin1Char('/') + fileName;
-            //qDebug() << "recur" << !copyRecursively(newSrcFilePath, newTgtFilePath);
             if (!copyRecursively(newSrcFilePath, newTgtFilePath))
                 return false;
         }
-    } else {
+    } else { // Is a file
         QFile *file = new QFile(tgtFilePath);
+
+        // Clear the targer directory of the file, then copy
         if (!file->exists() || file->remove()) {
             qDebug() << srcFilePath << "clean!";
+
             if (!QFile::copy(srcFilePath, tgtFilePath)) {
                 qDebug() << srcFilePath << "not clean!";
                 return false;
