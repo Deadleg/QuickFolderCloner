@@ -67,7 +67,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QListView" name="listBackup"/>
+      <widget class="QListView" name="listBackup">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

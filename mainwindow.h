@@ -25,6 +25,8 @@ private slots:
 
     void on_pushButtonBackup_clicked();
 
+    void ShowContextMenu(const QPoint& pos);
+
 private:
     bool copyRecursively(QString &srcFileDirectory, QString &child);
     void setMasterLayout(const QString &dir);

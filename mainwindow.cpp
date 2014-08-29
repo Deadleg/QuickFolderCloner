@@ -3,6 +3,9 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QFileInfo>
+#include <QPoint>
+#include <QMenu>
+#include <QAction>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,6 +39,9 @@ void MainWindow::on_actionNew_Project_triggered()
     resetList();
 
     setMasterLayout(masterDirectory);
+
+    connect(ui->listBackup, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(ShowContextMenu(const QPoint&)));
 }
 
 void MainWindow::resetList()
@@ -139,4 +145,27 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
         }
     }
     return true;
+}
+
+void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
+{
+    QPoint globalPos = ui->listBackup->viewport()->mapToGlobal(pos);
+
+    QMenu myMenu;
+    myMenu.addAction("Delete");
+
+    QAction* selectedItem = myMenu.exec(globalPos);
+    if (selectedItem)
+    {
+        int row = ui->listBackup->currentIndex().row();
+        qDebug() << "Remove row:" << row;
+        model->removeRow(row);
+
+        // Remove from list of directores. TODO: check if index is correct.
+        childDirectories->removeAt(row);
+    }
+    else
+    {
+        qDebug() << "Do nothing";
+    }
 }
