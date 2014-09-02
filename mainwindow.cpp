@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QTreeWidgetItem>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -151,6 +152,13 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
 
             if (!QFile::copy(srcFilePath, tgtFilePath)) {
                 qDebug() << srcFilePath << "not clean!";
+
+                // Error occured copying file.
+                QMessageBox msgBox;
+                const QString err =  "An error occured copying " + srcFilePath + " to " + tgtFilePath;
+                msgBox.critical(this,"Error!", err);
+                msgBox.exec();
+
                 return false;
             }
         }
