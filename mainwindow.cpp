@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QMenu>
 #include <QAction>
+#include <QTreeWidgetItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,13 +17,19 @@ MainWindow::MainWindow(QWidget *parent) :
     childDirectories = new QStringList();
 
     // Populate model
-    model = new QStringListModel(*childDirectories);
-    model->setStringList(*childDirectories);
+    backupModel = new QStringListModel(*childDirectories);
+    backupModel->setStringList(*childDirectories);
 
     // Add to list
-    ui->listBackup->setModel(model);
+    ui->listBackup->setModel(backupModel);
 
     enableWidgets(false);
+
+    // Initialize file QTreeView
+    filesModel = new QFileSystemModel(this);
+
+    ui->treeViewMasterFolder->setModel(filesModel);
+
 }
 
 MainWindow::~MainWindow()
@@ -35,6 +42,8 @@ void MainWindow::on_actionNew_Project_triggered()
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "F:/google drive/code", QFileDialog::ShowDirsOnly);
     masterDirectory = dir;
 
+    qDebug() << dir;
+
     enableWidgets(true);
     resetList();
 
@@ -42,6 +51,10 @@ void MainWindow::on_actionNew_Project_triggered()
 
     connect(ui->listBackup, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(ShowContextMenu(const QPoint&)));
+
+    // Set files treeView
+    filesModel->setRootPath(masterDirectory);
+    ui->treeViewMasterFolder->setRootIndex(filesModel->index(masterDirectory));
 }
 
 void MainWindow::resetList()
@@ -49,7 +62,7 @@ void MainWindow::resetList()
     childDirectories = new QStringList();
 
     // Populate model
-    model->setStringList(*childDirectories);
+    backupModel->setStringList(*childDirectories);
 }
 
 void MainWindow::setMasterLayout(const QString &dir)
@@ -59,7 +72,7 @@ void MainWindow::setMasterLayout(const QString &dir)
 
 void MainWindow::enableWidgets(bool enable)
 {
-    ui->listFiles->setEnabled(enable);
+    ui->treeViewMasterFolder->setEnabled(enable);
     ui->listBackup->setEnabled(enable);
     ui->pushButtonBackup->setEnabled(enable);
     ui->pushButtonBrowse->setEnabled(enable);
@@ -82,7 +95,7 @@ void MainWindow::on_pushButtonBrowse_clicked()
         childDirectories->append(*newBackupDir);
 
         // Populate model
-        model->setStringList(*childDirectories);
+        backupModel->setStringList(*childDirectories);
     } else {
         // TODO create dialog to print the error.
     }
@@ -94,8 +107,6 @@ void MainWindow::on_pushButtonBackup_clicked()
 {
     for (int i = 0; i < childDirectories->length(); i++) {
         QString dir = childDirectories->at(i);
-        //QString srcDir = *masterDirectory;
-        //qDebug() << "master" << *masterDirectory;
         copyRecursively(masterDirectory, dir);
     }
 }
@@ -159,7 +170,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
     {
         int row = ui->listBackup->currentIndex().row();
         qDebug() << "Remove row:" << row;
-        model->removeRow(row);
+        backupModel->removeRow(row);
 
         // Remove from list of directores. TODO: check if index is correct.
         childDirectories->removeAt(row);
@@ -169,3 +180,5 @@ void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
         qDebug() << "Do nothing";
     }
 }
+
+

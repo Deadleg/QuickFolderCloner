@@ -45,7 +45,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="listFiles"/>
+      <widget class="QTreeView" name="treeViewMasterFolder"/>
      </item>
     </layout>
    </widget>

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStringListModel>
+#include <QFileSystemModel>
 
 namespace Ui {
 class MainWindow;
@@ -33,7 +34,9 @@ private:
     void enableWidgets(bool enable);
     void resetList();
 
-    QStringListModel *model;
+
+    QStringListModel *backupModel;
+    QFileSystemModel *filesModel;
     Ui::MainWindow *ui;
     QString masterDirectory;
     QString *newBackupDir;
