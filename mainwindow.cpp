@@ -40,7 +40,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionNew_Project_triggered()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "F:/google drive/code", QFileDialog::ShowDirsOnly);
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "C:/", QFileDialog::ShowDirsOnly);
     masterDirectory = dir;
 
     qDebug() << dir;
@@ -77,7 +77,6 @@ void MainWindow::enableWidgets(bool enable)
     ui->listBackup->setEnabled(enable);
     ui->pushButtonBackup->setEnabled(enable);
     ui->pushButtonBrowse->setEnabled(enable);
-    ui->textEditBackupDir->setEnabled(enable);
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -106,10 +105,16 @@ void MainWindow::on_pushButtonBrowse_clicked()
 
 void MainWindow::on_pushButtonBackup_clicked()
 {
+    // Disable backup button while performing backup.
+    ui->pushButtonBackup->setEnabled(false);
     for (int i = 0; i < childDirectories->length(); i++) {
         QString dir = childDirectories->at(i);
         copyRecursively(masterDirectory, dir);
+        ui->statusBar->showMessage("Backup to " + childDirectories->at(i) + " completed");
     }
+
+    // Enable backup button when finished.
+    ui->pushButtonBackup->setEnabled(true);
 }
 
 bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
@@ -121,7 +126,8 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
     qDebug() << "tgt:" << tgtFilePath;
 
     if (srcFileInfo.isDir()) { // Is a directory
-        qDebug() << "is dir:" << srcFileInfo.isDir();
+        ui->statusBar->showMessage("Entering " + srcFilePath);
+
         QDir targetDir(tgtFilePath);
         targetDir.cdUp();
 
@@ -146,12 +152,16 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
     } else { // Is a file
         QFile *file = new QFile(tgtFilePath);
 
+        ui->statusBar->showMessage("Copying " + srcFilePath + " to " + tgtFilePath);
         // Clear the targer directory of the file, then copy
         if (!file->exists() || file->remove()) {
             qDebug() << srcFilePath << "clean!";
 
+            ui->statusBar->showMessage("Deleted " + tgtFilePath);
             if (!QFile::copy(srcFilePath, tgtFilePath)) {
                 qDebug() << srcFilePath << "not clean!";
+
+                ui->statusBar->showMessage("Deletion failed for " + tgtFilePath);
 
                 // Error occured copying file.
                 QMessageBox msgBox;
@@ -160,7 +170,11 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
                 msgBox.exec();
 
                 return false;
+            } else {
+                ui->statusBar->showMessage("Successfully copied to " + tgtFilePath);
             }
+        } else {
+            ui->statusBar->showMessage("Unable to delete " + tgtFilePath);
         }
     }
     return true;
