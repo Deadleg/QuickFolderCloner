@@ -8,6 +8,9 @@
 #include <QAction>
 #include <QTreeWidgetItem>
 #include <QMessageBox>
+#include <QSettings>
+#include <QtWidgets>
+#include <Exception>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,7 +18,37 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Initialize file QTreeView
+    filesModel = new QFileSystemModel(this);
+
+    ui->treeViewMasterFolder->setModel(filesModel);
+
+    QSettings appSettings("wk", "ThesisBackup");
+
     childDirectories = new QStringList();
+
+    if (appSettings.contains("dirs")) {
+        qDebug() << "contains dirs";
+        masterDirectory = appSettings.value("master").toString();
+        qDebug() << "crash";
+        *childDirectories = appSettings.value("children").toStringList();
+
+        enableWidgets(true);
+        setMasterLayout(masterDirectory);
+
+        // Set files treeView
+        filesModel->setRootPath(masterDirectory);
+        ui->treeViewMasterFolder->setRootIndex(filesModel->index(masterDirectory));
+    } else {
+        masterDirectory = "";
+        childDirectories = new QStringList();
+
+        enableWidgets(false);
+
+    }
+
+    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+
 
     // Populate model
     backupModel = new QStringListModel(*childDirectories);
@@ -23,14 +56,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add to list
     ui->listBackup->setModel(backupModel);
-
-    enableWidgets(false);
-
-    // Initialize file QTreeView
-    filesModel = new QFileSystemModel(this);
-
-    ui->treeViewMasterFolder->setModel(filesModel);
-
 }
 
 MainWindow::~MainWindow()
@@ -84,6 +109,17 @@ void MainWindow::on_actionQuit_triggered()
 
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (masterDirectory.size() != 0 && childDirectories->size() != 0) {
+        QSettings appSettings("wk", "ThesisBackup");
+        appSettings.setValue("dirs", 1);
+        appSettings.setValue("master", masterDirectory);
+        appSettings.setValue("children", *childDirectories);
+    }
+    event->accept();
+}
+
 void MainWindow::on_pushButtonBrowse_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "F:/google drive/code", QFileDialog::ShowDirsOnly);
@@ -96,6 +132,7 @@ void MainWindow::on_pushButtonBrowse_clicked()
 
         // Populate model
         backupModel->setStringList(*childDirectories);
+
     } else {
         // TODO create dialog to print the error.
     }

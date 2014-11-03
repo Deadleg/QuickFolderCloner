@@ -17,6 +17,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
     void on_actionNew_Project_triggered();
 
@@ -33,7 +36,6 @@ private:
     void setMasterLayout(const QString &dir);
     void enableWidgets(bool enable);
     void resetList();
-
 
     QStringListModel *backupModel;
     QFileSystemModel *filesModel;
