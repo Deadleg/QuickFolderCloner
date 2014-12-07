@@ -27,10 +27,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     childDirectories = new QStringList();
 
+    // Check if previous session saved in app settings
     if (appSettings.contains("dirs")) {
         qDebug() << "contains dirs";
         masterDirectory = appSettings.value("master").toString();
-        qDebug() << "crash";
         *childDirectories = appSettings.value("children").toStringList();
 
         enableWidgets(true);
@@ -56,6 +56,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add to list
     ui->listBackup->setModel(backupModel);
+
+    // Set context menu for backup list
+    ui->listBackup->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->listBackup, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(ShowContextMenu(const QPoint&)));
 }
 
 MainWindow::~MainWindow()
@@ -74,9 +79,6 @@ void MainWindow::on_actionNew_Project_triggered()
     resetList();
 
     setMasterLayout(masterDirectory);
-
-    connect(ui->listBackup, SIGNAL(customContextMenuRequested(const QPoint&)),
-        this, SLOT(ShowContextMenu(const QPoint&)));
 
     // Set files treeView
     filesModel->setRootPath(masterDirectory);
@@ -203,7 +205,7 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
                 // Error occured copying file.
                 QMessageBox msgBox;
                 const QString err =  "An error occured copying " + srcFilePath + " to " + tgtFilePath;
-                msgBox.critical(this,"Error!", err);
+                msgBox.critical(this, "Error!", err);
                 msgBox.exec();
 
                 return false;
@@ -229,10 +231,11 @@ void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
     {
         int row = ui->listBackup->currentIndex().row();
         qDebug() << "Remove row:" << row;
-        backupModel->removeRow(row);
 
         // Remove from list of directores. TODO: check if index is correct.
         childDirectories->removeAt(row);
+
+        backupModel->setStringList(*childDirectories);
     }
     else
     {
