@@ -192,7 +192,7 @@ bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
         QFile *file = new QFile(tgtFilePath);
 
         ui->statusBar->showMessage("Copying " + srcFilePath + " to " + tgtFilePath);
-        // Clear the targer directory of the file, then copy
+        // Clear any existing file, then copy
         if (!file->exists() || file->remove()) {
             qDebug() << srcFilePath << "clean!";
 
@@ -237,10 +237,4 @@ void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
 
         backupModel->setStringList(*childDirectories);
     }
-    else
-    {
-        qDebug() << "Do nothing";
-    }
 }
-
-
