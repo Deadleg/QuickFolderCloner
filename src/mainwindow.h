@@ -31,6 +31,8 @@ private slots:
 
     void ShowContextMenu(const QPoint& pos);
 
+    void on_pushButtonAddDir_clicked();
+
 private:
     bool copyRecursively(QString &srcFileDirectory, QString &child);
     void setMasterLayout(const QString &dir);
@@ -41,7 +43,6 @@ private:
     QFileSystemModel *filesModel;
     Ui::MainWindow *ui;
     QString masterDirectory;
-    QString *newBackupDir;
     QStringList *childDirectories;
 };
 

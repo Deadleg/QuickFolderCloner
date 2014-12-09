@@ -124,36 +124,24 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::on_pushButtonBrowse_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "F:/google drive/code", QFileDialog::ShowDirsOnly);
-    newBackupDir = &dir;
-
-    // Check if the new dir is not already added, is not empty, and is not the same as the master directory.
-    if (newBackupDir != masterDirectory && *newBackupDir != "" && !childDirectories->contains(*newBackupDir)) {
-        // Add to list
-        childDirectories->append(*newBackupDir);
-
-        // Populate model
-        backupModel->setStringList(*childDirectories);
-
-    } else {
-        // TODO create dialog to print the error.
-    }
-
-
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open File"), "C:/", QFileDialog::ShowDirsOnly);
+    ui->textEditNewBackupDir->setText(dir);
 }
 
 void MainWindow::on_pushButtonBackup_clicked()
 {
     // Disable backup button while performing backup.
     ui->pushButtonBackup->setEnabled(false);
+    // Call copyRecursively for each backup directory
     for (int i = 0; i < childDirectories->length(); i++) {
         QString dir = childDirectories->at(i);
         copyRecursively(masterDirectory, dir);
         ui->statusBar->showMessage("Backup to " + childDirectories->at(i) + " completed");
     }
 
-    // Enable backup button when finished.
+    // Enable backup button when finished and remove text.
     ui->pushButtonBackup->setEnabled(true);
+    ui->textEditNewBackupDir->setText("");
 }
 
 bool MainWindow::copyRecursively(QString &srcFilePath, QString &tgtFilePath){
@@ -236,5 +224,21 @@ void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
         childDirectories->removeAt(row);
 
         backupModel->setStringList(*childDirectories);
+    }
+}
+
+void MainWindow::on_pushButtonAddDir_clicked()
+{
+    QString newBackupDir = ui->textEditNewBackupDir->toPlainText();
+    // Check if the new dir is not already added, is not empty, and is not the same as the master directory.
+    if (newBackupDir != masterDirectory && newBackupDir != "" && !childDirectories->contains(newBackupDir)) {
+        // Add to list
+        childDirectories->append(newBackupDir);
+
+        // Populate model
+        backupModel->setStringList(*childDirectories);
+
+    } else {
+        // TODO create dialog to print the error.
     }
 }
