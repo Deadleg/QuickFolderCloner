@@ -133,10 +133,10 @@ void MainWindow::on_pushButtonBackup_clicked()
     // Disable backup button while performing backup.
     ui->pushButtonBackup->setEnabled(false);
     // Call copyRecursively for each backup directory
-    for (int i = 0; i < childDirectories->length(); i++) {
-        QString dir = childDirectories->at(i);
+    foreach (const QString &fileDirectory, *childDirectories) {
+        QString dir = fileDirectory;
         copyRecursively(masterDirectory, dir);
-        ui->statusBar->showMessage("Backup to " + childDirectories->at(i) + " completed");
+        ui->statusBar->showMessage("Backup to " + fileDirectory + " completed");
     }
 
     // Enable backup button when finished and remove text.
